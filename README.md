@@ -1,6 +1,6 @@
 # Multi-Tenant E-Commerce API
 
-A REST API built with **ASP.NET Core 10** and **Entity Framework Core**, deployed live on **Azure**.
+A REST API project for practicing ASP .NET Web API, built with **ASP.NET Core 10** and **Entity Framework Core**, deployed live on **Azure**, with SQL Server Database connection (Azure), JWT Authentication, Password Hashing etc.
 
 Multiple companies (tenants) can run on the same platform. Each company has its own inventory and staff. Users are divided into SuperAdmin, StoreAdmin and Customers. SuperAdmins have entire access, StoreAdmins have access to their company specific areas, Customers can shop across any company. Every role sees only what they're allowed to see.
 
@@ -10,7 +10,23 @@ Multiple companies (tenants) can run on the same platform. Each company has its 
 
 ## Try it live
 
-The API is fully interactive via the Scalar UI at the link above — no setup needed.
+The API is fully interactive via the Scalar UI at the link above, no setup needed. I also had implemented Swagger but due to JWT authentication Scalar is more viable.
+
+### Test Users, Companies and Items Values
+USERS:
+1. Super Admin 1: Email: suadmin1@email.com, Password: suadmin1@123, UserID (Guid): 1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A
+2. Store Admin 1: Email: stadmin1@email.com, Password: stadmin1@123, UserID (Guid): 246844AA-803B-F111-ADFC-FE00B8F5346A
+3. Customer 1: Email: c1@email.com, Password: c1@123, UserID (Guid): 807A525B-7F3B-F111-ADFC-FE00B8F5346A
+
+Companies:
+1. Name: Snapchat, CompanyID (Guid): E46B7D1A-7F3B-F111-ADFC-FE00B8F5346A
+2. Name: Microsoft, CompanyID (Guid): 1D587F30-7F3B-F111-ADFC-FE00B8F5346A
+
+Items:
+1. Name: Camera, Company: Snapchat, ItemID (Guid): 978C05FC-803B-F111-ADFC-FE00B8F5346A
+2. Name: Filter, Company: Snapchat, ItemID (Guid): FF9BA504-813B-F111-ADFC-FE00B8F5346A
+3. Name: Laptop, Company: Microsoft, ItemID (Guid): 47566125-813B-F111-ADFC-FE00B8F5346A
+4. Name: Tablet, Company: Microsoft, ItemID (Guid): 2FEA252C-813B-F111-ADFC-FE00B8F5346A
 
 ### Step 1 — Log in
 
@@ -20,7 +36,13 @@ Call the login endpoint with your role, email, and password:
 POST /api/UserLogin/login/{role}_{email}_{password}
 ```
 
-Roles are: `SuperAdmin`, `StoreAdmin`, `Customer`
+Roles are: `SuperAdmin (0)`, `StoreAdmin (1)`, `Customer (2)`
+
+The request will look like this:
+
+```
+POST /api/UserLogin/login/0_suadmin1@email.com_suadmin1@123
+```
 
 The response will look like this:
 
@@ -32,21 +54,14 @@ The response will look like this:
 }
 ```
 
-Copy the full token value including the word `Bearer`.
+Copy the full token value including the word `Bearer` (it is necessary for API calls and it will be active for 60 minutes after generation).
 
 ### Step 2 — Authorize in Scalar
 
-1. Click the **Authorize** button (🔒) at the top of the Scalar page
-2. Paste your token into the field — make sure it starts with `Bearer ` followed by the token
-3. Click **Authorize**
-
-All subsequent requests will now include your token automatically.
-
-### Step 3 — Call endpoints
-
-You're now authenticated. Every endpoint in the Scalar UI shows which roles can access it. Trying to call an endpoint your role doesn't have access to will return `401 Unauthorized` or `403 Forbidden`.
-
----
+1. For every API call, in the Key section add **Authorization**
+2. Paste your token into the field, make sure it starts with `Bearer ` followed by the token
+3. Only then the API call will work.
+4. Read the endpoints that the Users can access (view in the document below), otherwise if wrongly authorized or not accessible, it will return `401 Unauthorized` or `403 Forbidden` respectively.
 
 ## How roles work
 
@@ -58,7 +73,7 @@ There are three roles. Each one can do more or less depending on their level:
 | **StoreAdmin** | Manage their own company only — items, staff, and view their finance dashboard |
 | **Customer** | Browse items, manage their cart, checkout, and view their order history |
 
-Your role is locked into your JWT token at login. The API checks it on every request — you cannot call endpoints above your role level.
+Your role is locked into your JWT token at login. The API checks it on every request, you cannot call endpoints above your role level.
 
 **StoreAdmin tenant isolation:** even if a StoreAdmin passes another company's ID in the URL, the API checks ownership before doing anything and returns `403 Forbidden` if it doesn't match.
 
@@ -68,7 +83,7 @@ Your role is locked into your JWT token at login. The API checks it on every req
 
 | What | Why |
 |---|---|
-| ASP.NET Core 8 | API framework |
+| ASP.NET Core 10 | API framework |
 | Entity Framework Core | Database ORM |
 | SQL Server on Azure | Database |
 | Azure App Service | Hosting |
@@ -140,27 +155,25 @@ Your role is locked into your JWT token at login. The API checks it on every req
 
 ## Notable design decisions
 
-**Tenant isolation in one place** — instead of checking company ownership in every service method, there is a single `TenantAuthorizationService`. Every controller endpoint that takes a `companyId` runs that check first. One place to maintain, impossible to forget.
+**Tenant isolation in one place**, instead of checking company ownership in every service method, there is a single `TenantAuthorizationService`. Every controller endpoint that takes a `companyId` runs that check first. One place to maintain, impossible to forget.
 
-**Soft deletes** — nothing is permanently deleted. Every entity has an `IsDeleted` flag. Deleted records are hidden from queries but can be restored by an admin.
+**Soft deletes**, nothing is permanently deleted. Every entity has an `IsDeleted` flag. Deleted records are hidden from queries but can be restored by an admin.
 
-**Dual primary keys** — every entity has an internal `int Id` for fast database joins, and a public-facing `Guid` for URLs and API responses. This prevents users from guessing sequential IDs to enumerate data.
+**Dual primary keys**, every entity has an internal `int Id` for fast database joins, and a public facing `Guid` for URLs and API responses. This prevents users from guessing sequential IDs to enumerate data.
 
-**No N+1 queries** — checkout and cart operations load everything needed in one query using `.Include().ThenInclude()`, then work in memory. No database call per item inside a loop.
+**Optimized database queries**, implemented database queries according to specific data needed and as required, and maintained less overhead.
 
-**Order snapshots** — when a customer checks out, item name, price, and image are copied into the `OrderItem` record. Future changes to the item don't affect historical orders.
-
-**Single `SaveChanges` per operation** — all mutations within one request are committed together in one database round-trip. No partial writes.
+**Order snapshots**, when a customer checks out, item name, price, and image are copied into the `OrderItem` record. Future changes to the item don't affect historical orders.
 
 ---
 
 ## Run it locally
 
-**Prerequisites:** .NET 8 SDK, SQL Server
+**Prerequisites:** .NET 10 SDK, SQL Server
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/Multi-Tenant-E-Commerce-API.git
+git clone https://github.com/usamaqh/Multi-Tenant-E-Commerce-API.git
 cd Multi-Tenant-E-Commerce-API
 
 # 2. Set up config
@@ -192,12 +205,9 @@ Scalar UI will be available at `https://localhost:{port}/scalar/v1`.
 }
 ```
 
+For local you can also write as: 
+```
+"DefaultConnection": "Server={LocalServerName};Database={DBName};TrustServerCertificate=True;Trusted_Connection=True;"
+```
+
 ---
-
-## What I'd improve next
-
-- **Refresh tokens** — JWT tokens expire after 60 minutes with no way to renew without logging in again
-- **Pagination** — list endpoints like `get_all` return all records with no limit
-- **Integration tests** — no automated test coverage on the service layer yet
-- **Rate limiting** on login — no protection against brute-force password attempts
-- **Azure Blob Storage for images** — images are currently stored on the server filesystem, which resets on Azure App Service restarts
