@@ -13,11 +13,12 @@ Multiple companies (tenants) can run on the same platform. Each company has its 
 The API is fully interactive via the Scalar UI at the link above, no setup needed. I also had implemented Swagger but due to JWT authentication Scalar is more viable.
 
 ### Users, Companies and Items Test Values
-| USERS |
+***USERS***
+| NAME | EMAIL | PASSWORD | USERID (GUID)
 |---|---|
-| Super Admin 1 | | Email: suadmin1@email.com | Password: suadmin1@123 | UserID (Guid): 1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A |
-| Store Admin 1 | Email: stadmin1@email.com | Password: stadmin1@123| UserID (Guid): 246844AA-803B-F111-ADFC-FE00B8F5346A |
-| Customer 1 | Email: c1@email.com | Password: c1@123 | UserID (Guid): 807A525B-7F3B-F111-ADFC-FE00B8F5346A |
+| ***Super Admin 1*** | suadmin1@email.com | suadmin1@123 | 1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A |
+| ***Store Admin 1*** | stadmin1@email.com | stadmin1@123| 246844AA-803B-F111-ADFC-FE00B8F5346A |
+| ***Customer 1*** | c1@email.com | c1@123 | 807A525B-7F3B-F111-ADFC-FE00B8F5346A |
 
 | Companies |
 |---|---|
