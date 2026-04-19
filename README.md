@@ -14,15 +14,18 @@ The API is fully interactive via the Scalar UI at the link above, no setup neede
 
 ### Users, Companies and Items Test Values
 | USERS |
+|---|---|
 | Super Admin 1 | | Email: suadmin1@email.com | Password: suadmin1@123 | UserID (Guid): 1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A |
 | Store Admin 1 | Email: stadmin1@email.com | Password: stadmin1@123| UserID (Guid): 246844AA-803B-F111-ADFC-FE00B8F5346A |
 | Customer 1 | Email: c1@email.com | Password: c1@123 | UserID (Guid): 807A525B-7F3B-F111-ADFC-FE00B8F5346A |
 
 | Companies |
+|---|---|
 | Name: Snapchat | CompanyID (Guid): E46B7D1A-7F3B-F111-ADFC-FE00B8F5346A |
 | Name: Microsoft | CompanyID (Guid): 1D587F30-7F3B-F111-ADFC-FE00B8F5346A |
 
 | Items |
+|---|---|
 | Name: Camera | Company: Snapchat | ItemID (Guid): 978C05FC-803B-F111-ADFC-FE00B8F5346A |
 | Name: Filter | Company: Snapchat | ItemID (Guid): FF9BA504-813B-F111-ADFC-FE00B8F5346A |
 | Name: Laptop | Company: Microsoft | ItemID (Guid): 47566125-813B-F111-ADFC-FE00B8F5346A |
