@@ -1,99 +1,91 @@
 # Multi-Tenant E-Commerce API
 
-A production-deployed REST API built with **ASP.NET Core** and **Entity Framework Core**, implementing a multitenant e-commerce platform where multiple companies can operate independently on a shared infrastructure. Live on **Azure App Service** with a **SQL Server** backend.
+A REST API built with **ASP.NET Core 8** and **Entity Framework Core**, deployed live on **Azure**.
+
+Multiple companies (tenants) can run on the same platform. Each company has its own inventory and staff. Customers can shop across any company. Every role sees only what they're allowed to see.
+
+🟢 **Live at:** [https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1](https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1)
 
 ---
 
-## What it does
+## Try it live
 
-The API supports three distinct user roles — SuperAdmin, StoreAdmin, and Customer — each with their own scoped permissions. Multiple companies (tenants) can exist on the platform simultaneously. Each company manages its own inventory, and customers can browse items, manage a cart, and place orders across any company.
+The API is fully interactive via the Scalar UI at the link above — no setup needed.
 
-A dedicated tenant authorization layer ensures that StoreAdmins can only read and modify data belonging to their own company, regardless of what IDs they pass in the request.
+### Step 1 — Log in
+
+Call the login endpoint with your role, email, and password:
+
+```
+POST /api/UserLogin/login/{role}_{email}_{password}
+```
+
+Roles are: `SuperAdmin`, `StoreAdmin`, `Customer`
+
+The response will look like this:
+
+```json
+{
+  "token": "Bearer eyJhbGci...",
+  "userId": "...",
+  "email": "..."
+}
+```
+
+Copy the full token value including the word `Bearer`.
+
+### Step 2 — Authorize in Scalar
+
+1. Click the **Authorize** button (🔒) at the top of the Scalar page
+2. Paste your token into the field — make sure it starts with `Bearer ` followed by the token
+3. Click **Authorize**
+
+All subsequent requests will now include your token automatically.
+
+### Step 3 — Call endpoints
+
+You're now authenticated. Every endpoint in the Scalar UI shows which roles can access it. Trying to call an endpoint your role doesn't have access to will return `401 Unauthorized` or `403 Forbidden`.
+
+---
+
+## How roles work
+
+There are three roles. Each one can do more or less depending on their level:
+
+| Role | What they can do |
+|---|---|
+| **SuperAdmin** | Everything — manage all companies, all users, all items across the whole platform |
+| **StoreAdmin** | Manage their own company only — items, staff, and view their finance dashboard |
+| **Customer** | Browse items, manage their cart, checkout, and view their order history |
+
+Your role is locked into your JWT token at login. The API checks it on every request — you cannot call endpoints above your role level.
+
+**StoreAdmin tenant isolation:** even if a StoreAdmin passes another company's ID in the URL, the API checks ownership before doing anything and returns `403 Forbidden` if it doesn't match.
 
 ---
 
 ## Tech stack
 
-- **ASP.NET Core 8** — REST API framework
-- **Entity Framework Core** — ORM with SQL Server provider
-- **SQL Server on Azure** — relational database
-- **Azure App Service** — hosting
-- **JWT (HMAC-SHA256)** — stateless authentication
-- **ASP.NET Core Identity PasswordHasher** — password hashing
-
----
-
-## Architecture
-
-```
-Controllers
-    └── extract claims → call TenantAuthorizationService → call Service layer
-
-TenantAuthorizationService
-    └── single source of truth for company ownership checks
-
-Service layer (CompanyService, ItemsService, UserService, CustomerCartService, FinanceService)
-    └── business logic + EF Core queries → DTOs
-
-AppDbContext (EF Core)
-    └── SQL Server
-```
-
-The API uses a **layered service pattern** with constructor-injected dependencies throughout. All services are registered as scoped in `Program.cs` to align with the EF Core `DbContext` lifetime.
-
----
-
-## Role hierarchy
-
-| Role | What they can do |
+| What | Why |
 |---|---|
-| **SuperAdmin** | Full access — manage all companies, all users, all items |
-| **StoreAdmin** | Manage their own company's items, users, and view finance dashboard |
-| **Customer** | Browse items, manage cart, checkout, view purchase history |
-
-Role is embedded in the JWT at login and validated on every request via `[Authorize(Roles = ...)]`. Tenant isolation for StoreAdmin is enforced separately in `TenantAuthorizationService` before any service method is called.
-
----
-
-## Key design decisions
-
-### Tenant isolation
-Rather than scattering company-ownership checks across individual services, all authorization logic lives in a single `TenantAuthorizationService`. Every controller endpoint that accepts a `companyId` runs `CanAccessCompany(userId, role, companyId)` before calling the service layer. SuperAdmins bypass the check; StoreAdmins must own the company; Customers are always denied at this layer.
-
-### Soft deletes
-No data is permanently deleted. All entities carry an `IsDeleted` flag and all queries filter on `!IsDeleted`. Admins can restore deleted records via undelete endpoints.
-
-### Dual primary keys
-Every entity uses an `int Id` as the actual database primary key (clustered index, efficient joins) alongside a `Guid` public search key exposed in URLs and responses. This prevents sequential ID enumeration in the API while keeping the database fast.
-
-### EF Core query hygiene
-- `.AsNoTracking()` on all read-only queries — eliminates change tracker overhead when projecting to DTOs
-- `.Select()` projections push column selection to SQL — only the fields needed by the DTO are fetched
-- `AnyAsync()` used instead of `FirstOrDefaultAsync()` for existence checks — no column data fetched
-- Tracked entities use implicit change detection — no redundant `.Update()` calls before `SaveChangesAsync()`
-
-### Cart + stock consistency
-Stock is decremented atomically with the cart write in a single `SaveChangesAsync()` call. The `UpdateCartItem` method restores the previous quantity to stock before applying the new quantity, keeping inventory counts accurate across updates and removals. When a cart is emptied, the cart record itself is removed.
-
-### N+1 prevention
-The checkout and cart removal flows load all cart items and their related item entities in a single query using `.Include().ThenInclude()`, then operate on the in-memory graph. No per-item database queries inside loops.
-
-### Finance reporting
-`GetCustomerPurchaseHistory` uses a correlated subquery inside `Select()` to load orders and their line items in a single database round-trip. `GetCompanyFinanceDashboard` aggregates revenue and sold units from the `Items` table, which are updated at checkout time rather than computed on the fly.
+| ASP.NET Core 8 | API framework |
+| Entity Framework Core | Database ORM |
+| SQL Server on Azure | Database |
+| Azure App Service | Hosting |
+| JWT (HMAC-SHA256) | Authentication tokens |
+| ASP.NET Core PasswordHasher | Password hashing |
 
 ---
 
 ## Endpoints
 
 ### Authentication
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
 | POST | `/api/UserLogin/login/{role}_{email}_{password}` | Public |
 
-Returns a `Bearer` JWT token and basic user info. Token expires after 60 minutes.
-
 ### Companies
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
 | GET | `/api/Company/get_all` | SuperAdmin |
 | GET | `/api/Company/get_by_id/{companyId}` | SuperAdmin |
@@ -105,7 +97,7 @@ Returns a `Bearer` JWT token and basic user info. Token expires after 60 minutes
 | PUT | `/api/Company/undelete/{companyId}` | SuperAdmin |
 
 ### Items
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
 | GET | `/api/Items/get_items/{companyId}` | SuperAdmin, StoreAdmin (own company) |
 | GET | `/api/Items/get_item_by_id/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
@@ -116,9 +108,9 @@ Returns a `Bearer` JWT token and basic user info. Token expires after 60 minutes
 | PUT | `/api/Items/undelete/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
 
 ### Users
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
-| GET | `/api/User/get_all` | SuperAdmin, StoreAdmin (own company users) |
+| GET | `/api/User/get_all` | SuperAdmin, StoreAdmin (own company) |
 | GET | `/api/User/get_all_by_roll/{userRole}` | SuperAdmin |
 | GET | `/api/User/get_by_userid/{userId}` | SuperAdmin, StoreAdmin |
 | GET | `/api/User/get_by_name/{fname}_{lname}` | SuperAdmin, StoreAdmin, Customer (own profile) |
@@ -129,7 +121,7 @@ Returns a `Bearer` JWT token and basic user info. Token expires after 60 minutes
 | PUT | `/api/User/undelete/{userId}` | SuperAdmin |
 
 ### Cart
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
 | GET | `/api/CustomerCart/get_cart_details` | All roles |
 | POST | `/api/CustomerCart/add_item` | Customer |
@@ -139,79 +131,73 @@ Returns a `Bearer` JWT token and basic user info. Token expires after 60 minutes
 | GET | `/api/CustomerCart/checkout` | Customer |
 
 ### Finance
-| Method | Route | Access |
+| Method | Route | Who |
 |---|---|---|
 | GET | `/api/Finances/get_customer_purchase_history` | All roles |
 | GET | `/api/Finances/get_company_finance_dashboard/{companyId}` | SuperAdmin, StoreAdmin (own company) |
 
 ---
 
-## Data model
+## Notable design decisions
 
-```
-User ──────────────── Company
- │  (StoreAdmin has    │
- │   CompanyId Guid)   │
- │                     │
- └── Cart              └── Item
-      └── CartItem          └── CartItem
-           └── Item
-                
-Order
- └── OrderItem (snapshot of item data at purchase time)
-```
+**Tenant isolation in one place** — instead of checking company ownership in every service method, there is a single `TenantAuthorizationService`. Every controller endpoint that takes a `companyId` runs that check first. One place to maintain, impossible to forget.
 
-`OrderItem` stores a point-in-time snapshot of item name, price, and image at the moment of purchase — so order history is unaffected by future item edits or deletions.
+**Soft deletes** — nothing is permanently deleted. Every entity has an `IsDeleted` flag. Deleted records are hidden from queries but can be restored by an admin.
+
+**Dual primary keys** — every entity has an internal `int Id` for fast database joins, and a public-facing `Guid` for URLs and API responses. This prevents users from guessing sequential IDs to enumerate data.
+
+**No N+1 queries** — checkout and cart operations load everything needed in one query using `.Include().ThenInclude()`, then work in memory. No database call per item inside a loop.
+
+**Order snapshots** — when a customer checks out, item name, price, and image are copied into the `OrderItem` record. Future changes to the item don't affect historical orders.
+
+**Single `SaveChanges` per operation** — all mutations within one request are committed together in one database round-trip. No partial writes.
 
 ---
 
-## Running locally
+## Run it locally
 
-**Prerequisites:** .NET 8 SDK, SQL Server (local or Azure)
+**Prerequisites:** .NET 8 SDK, SQL Server
 
-1. Clone the repo
 ```bash
+# 1. Clone
 git clone https://github.com/your-username/Multi-Tenant-E-Commerce-API.git
 cd Multi-Tenant-E-Commerce-API
+
+# 2. Set up config
+cp appsettings.example.json appsettings.json
+# Fill in your connection string and JWT values in appsettings.json
+
+# 3. Apply database migrations
+dotnet ef database update
+
+# 4. Run
+dotnet run
 ```
 
-2. Copy the example config and fill in your values
-```bash
-cp appsettings.example.json appsettings.json
-```
+Scalar UI will be available at `https://localhost:{port}/scalar/v1`.
+
+### Config reference (`appsettings.example.json`)
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=...;Database=...;..."
+    "DefaultConnection": "Server=tcp:{ServerName};Initial Catalog={DBName};User ID={UserID};Password={Password};Encrypt=True;"
   },
   "Jwt": {
-    "Key": "your-secret-key-min-32-chars",
-    "Issuer": "your-issuer",
-    "Audience": "your-audience",
-    "Subject": "your-subject"
+    "Key": "{your-secret-key-minimum-32-characters}",
+    "Issuer": "{Issuer}",
+    "Audience": "{Audience}",
+    "Subject": "{Subject}"
   }
 }
 ```
 
-3. Apply migrations
-```bash
-dotnet ef database update
-```
-
-4. Run
-```bash
-dotnet run
-```
-
-Swagger UI available at `https://localhost:{port}/swagger` in development.
-
 ---
 
-## What I'd add next
+## What I'd improve next
 
-- **Refresh tokens** — current JWTs expire after 60 minutes with no renewal path
-- **Pagination** on list endpoints — `GetAllUsers` and `GetAllItems` return unbounded result sets
-- **Integration tests** — service layer has no test coverage currently
-- **Rate limiting** on the login endpoint — no brute-force protection at the moment
-- **Blob storage for images** — currently saved to `wwwroot/uploads` on the server filesystem, which doesn't survive Azure App Service restarts without a persistent volume
+- **Refresh tokens** — JWT tokens expire after 60 minutes with no way to renew without logging in again
+- **Pagination** — list endpoints like `get_all` return all records with no limit
+- **Integration tests** — no automated test coverage on the service layer yet
+- **Rate limiting** on login — no protection against brute-force password attempts
+- **Azure Blob Storage for images** — images are currently stored on the server filesystem, which resets on Azure App Service restarts
