@@ -1,6 +1,6 @@
 # Multi-Tenant E-Commerce API
 
-A REST API built with **ASP.NET Core 8** and **Entity Framework Core**, deployed live on **Azure**.
+A REST API built with **ASP.NET Core 10** and **Entity Framework Core**, deployed live on **Azure**.
 
 Multiple companies (tenants) can run on the same platform. Each company has its own inventory and staff. Customers can shop across any company. Every role sees only what they're allowed to see.
 
