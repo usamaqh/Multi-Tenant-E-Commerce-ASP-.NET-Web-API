@@ -12,25 +12,33 @@ Multiple companies (tenants) can run on the same platform. Each company has its 
 
 The API is fully interactive via the Scalar UI at the link above, no setup needed. I also had implemented Swagger but due to JWT authentication Scalar is more viable.
 
-### Users, Companies and Items Test Values
-***USERS***
-| NAME | EMAIL | PASSWORD | USERID (GUID)
-|---|---|
-| ***Super Admin 1*** | suadmin1@email.com | suadmin1@123 | 1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A |
-| ***Store Admin 1*** | stadmin1@email.com | stadmin1@123| 246844AA-803B-F111-ADFC-FE00B8F5346A |
-| ***Customer 1*** | c1@email.com | c1@123 | 807A525B-7F3B-F111-ADFC-FE00B8F5346A |
+## Test values
 
-| Companies |
-|---|---|
-| Name: Snapchat | CompanyID (Guid): E46B7D1A-7F3B-F111-ADFC-FE00B8F5346A |
-| Name: Microsoft | CompanyID (Guid): 1D587F30-7F3B-F111-ADFC-FE00B8F5346A |
+Use these to try the live API without creating your own data.
 
-| Items |
+### Users
+
+| Name | Email | Password | Role | User ID |
+|---|---|---|---|---|
+| Super Admin 1 | suadmin1@email.com | suadmin1@123 | SuperAdmin | `1ED29FCD-7E3B-F111-ADFC-FE00B8F5346A` |
+| Store Admin 1 | stadmin1@email.com | stadmin1@123 | StoreAdmin | `246844AA-803B-F111-ADFC-FE00B8F5346A` |
+| Customer 1 | c1@email.com | c1@123 | Customer | `807A525B-7F3B-F111-ADFC-FE00B8F5346A` |
+
+### Companies
+
+| Name | Company ID |
 |---|---|
-| Name: Camera | Company: Snapchat | ItemID (Guid): 978C05FC-803B-F111-ADFC-FE00B8F5346A |
-| Name: Filter | Company: Snapchat | ItemID (Guid): FF9BA504-813B-F111-ADFC-FE00B8F5346A |
-| Name: Laptop | Company: Microsoft | ItemID (Guid): 47566125-813B-F111-ADFC-FE00B8F5346A |
-| Name: Tablet | Company: Microsoft | ItemID (Guid): 2FEA252C-813B-F111-ADFC-FE00B8F5346A |
+| Snapchat | `E46B7D1A-7F3B-F111-ADFC-FE00B8F5346A` |
+| Microsoft | `1D587F30-7F3B-F111-ADFC-FE00B8F5346A` |
+
+### Items
+
+| Name | Company | Item ID |
+|---|---|---|
+| Camera | Snapchat | `978C05FC-803B-F111-ADFC-FE00B8F5346A` |
+| Filter | Snapchat | `FF9BA504-813B-F111-ADFC-FE00B8F5346A` |
+| Laptop | Microsoft | `47566125-813B-F111-ADFC-FE00B8F5346A` |
+| Tablet | Microsoft | `2FEA252C-813B-F111-ADFC-FE00B8F5346A` |
 
 ### Step 1 — Log in
 
