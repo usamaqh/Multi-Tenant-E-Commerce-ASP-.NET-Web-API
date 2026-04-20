@@ -213,6 +213,10 @@ Scalar UI will be available at `https://localhost:{port}/scalar/v1`.
     "Issuer": "{Issuer}",
     "Audience": "{Audience}",
     "Subject": "{Subject}"
+  },
+  "AzureStorage": {
+    "ConnectionString": "{Azure Connection String}",
+    "ContainerName": "{Container Name}"
   }
 }
 ```
