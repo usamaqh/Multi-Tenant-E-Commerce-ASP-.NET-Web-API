@@ -1,6 +1,6 @@
 # Multi-Tenant E-Commerce API
 
-A REST API project for practicing ASP .NET Web API, built with **ASP.NET Core 10** and **Entity Framework Core**, deployed live on **Azure**, with SQL Server Database connection (Azure), JWT Authentication, Password Hashing etc.
+A REST API project for practicing ASP .NET Web API, built with **ASP.NET Core 10** and **Entity Framework Core**, deployed live on **Azure**, with SQL Server Database (Azure), Azure Blob, JWT Authentication, Password Hashing etc.
 
 Multiple companies (tenants) can run on the same platform. Each company has its own inventory and staff. Users are divided into SuperAdmin, StoreAdmin and Customers. SuperAdmins have entire access, StoreAdmins have access to their company specific areas, Customers can shop across any company. Every role sees only what they're allowed to see.
 
