@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Multi_Tenant_E_Commerce_API.Data;
+using Multi_Tenant_E_Commerce_API.Helpers;
 using Multi_Tenant_E_Commerce_API.Services.Authorization;
 using Multi_Tenant_E_Commerce_API.Services.CompanyService;
 using Multi_Tenant_E_Commerce_API.Services.CustomerService;
@@ -17,6 +19,7 @@ builder.Services.AddControllers();
 
 // Use built-in OpenAPI (already installed)
 builder.Services.AddOpenApi();
+
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -61,4 +64,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+ImageUploadHelper.Initialize(app.Configuration);
 app.Run();

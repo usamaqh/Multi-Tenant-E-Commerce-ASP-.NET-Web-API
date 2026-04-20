@@ -5,6 +5,6 @@ namespace Multi_Tenant_E_Commerce_API.Services.UserService
 {
     public interface IUserLoginService
     {
-        public Task<(string?, UserResponse?)> UserLogin(UserRoleEnum userRole, string email, string password);
+        public Task<(string?, UserResponse?)> UserLogin(string email, string password);
     }
 }

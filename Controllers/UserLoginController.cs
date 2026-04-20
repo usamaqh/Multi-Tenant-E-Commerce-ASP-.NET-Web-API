@@ -17,12 +17,12 @@ namespace Multi_Tenant_E_Commerce_API.Controllers
         }
 
         [HttpPost]
-        [Route("login/{role}_{email}_{password}")]
-        public async Task<IActionResult> UserLogin(UserRoleEnum role, string email, string password)
+        [Route("login/{email}_{password}")]
+        public async Task<IActionResult> UserLogin(string email, string password)
         {
             try
             {
-                (string?, UserResponse?) result = await _IUserLogin.UserLogin(role, email, password);
+                (string?, UserResponse?) result = await _IUserLogin.UserLogin(email, password);
 
                 if (result.Item2 == null)
                     return BadRequest(result.Item1);

@@ -21,10 +21,10 @@ namespace Multi_Tenant_E_Commerce_API.Services.UserService
             _configuration = configuration;
         }
 
-        public async Task<(string?, UserResponse?)> UserLogin(UserRoleEnum userRole, string email, string password)
+        public async Task<(string?, UserResponse?)> UserLogin(string email, string password)
         {
             User? user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => !u.IsDeleted && u.Role == userRole && u.Email == email);
+                .FirstOrDefaultAsync(u => !u.IsDeleted && u.Email == email);
 
             if (user == null)
                 return ("User not found!", null);
@@ -45,7 +45,7 @@ namespace Multi_Tenant_E_Commerce_API.Services.UserService
             });
         }
 
-        private string GetToken(Models.User user)
+        private string GetToken(User user)
         {
             Claim[] claims = new Claim[]
             {
