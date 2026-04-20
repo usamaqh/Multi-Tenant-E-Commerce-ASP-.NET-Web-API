@@ -118,8 +118,8 @@ Your role is locked into your JWT token at login. The API checks it on every req
 | GET | `/api/Company/get_by_id/{companyId}` | SuperAdmin |
 | GET | `/api/Company/get_by_name/{companyName}` | SuperAdmin |
 | GET | `/api/Company/get_by_adminid/{adminId}` | SuperAdmin |
-| POST | `/api/Company/add` | SuperAdmin |
-| PUT | `/api/Company/update/{companyId}` | SuperAdmin |
+| POST [Multipart Form] | `/api/Company/add` | SuperAdmin |
+| PUT [Multipart Form] | `/api/Company/update/{companyId}` | SuperAdmin |
 | DELETE | `/api/Company/delete/{companyId}` | SuperAdmin |
 | PUT | `/api/Company/undelete/{companyId}` | SuperAdmin |
 
@@ -129,8 +129,8 @@ Your role is locked into your JWT token at login. The API checks it on every req
 | GET | `/api/Items/get_items/{companyId}` | SuperAdmin, StoreAdmin (own company) |
 | GET | `/api/Items/get_item_by_id/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
 | GET | `/api/Items/get_item_by_name/{companyId}_{itemName}` | SuperAdmin, StoreAdmin (own company) |
-| POST | `/api/Items/add` | SuperAdmin, StoreAdmin (own company) |
-| PUT | `/api/Items/update/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
+| POST [Multipart Form] | `/api/Items/add` | SuperAdmin, StoreAdmin (own company) |
+| PUT [Multipart Form] | `/api/Items/update/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
 | DELETE | `/api/Items/delete/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
 | PUT | `/api/Items/undelete/{companyId}_{itemId}` | SuperAdmin, StoreAdmin (own company) |
 
@@ -142,8 +142,8 @@ Your role is locked into your JWT token at login. The API checks it on every req
 | GET | `/api/User/get_by_userid/{userId}` | SuperAdmin, StoreAdmin |
 | GET | `/api/User/get_by_name/{fname}_{lname}` | SuperAdmin, StoreAdmin, Customer (own profile) |
 | GET | `/api/User/get_by_email/{email}` | SuperAdmin, StoreAdmin, Customer (own profile) |
-| POST | `/api/User/add` | SuperAdmin, StoreAdmin |
-| PUT | `/api/User/update/{userId}` | SuperAdmin, StoreAdmin, Customer (own profile) |
+| POST [Multipart Form] | `/api/User/add` | SuperAdmin, StoreAdmin |
+| PUT [Multipart Form] | `/api/User/update/{userId}` | SuperAdmin, StoreAdmin, Customer (own profile) |
 | DELETE | `/api/User/delete/{userId}` | SuperAdmin, StoreAdmin, Customer (own profile) |
 | PUT | `/api/User/undelete/{userId}` | SuperAdmin |
 
@@ -151,8 +151,8 @@ Your role is locked into your JWT token at login. The API checks it on every req
 | Method | Route | Who |
 |---|---|---|
 | GET | `/api/CustomerCart/get_cart_details` | All roles |
-| POST | `/api/CustomerCart/add_item` | Customer |
-| PUT | `/api/CustomerCart/update_item` | Customer |
+| POST [JSON Body] | `/api/CustomerCart/add_item` | Customer |
+| PUT [JSON Body] | `/api/CustomerCart/update_item` | Customer |
 | DELETE | `/api/CustomerCart/remove_item/{cartItemId}` | Customer |
 | DELETE | `/api/CustomerCart/remove_cart` | All roles |
 | GET | `/api/CustomerCart/checkout` | Customer |
