@@ -9,7 +9,7 @@ Multiple companies (tenants) can run on the same platform. Each company has its 
 
 **OR**
 
-[https://green-field-0f979ec1e.7.azurestaticapps.net/] (Basic Front End)
+[https://green-field-0f979ec1e.7.azurestaticapps.net/] (Front End with React)
 ---
 
 ## Try it live
