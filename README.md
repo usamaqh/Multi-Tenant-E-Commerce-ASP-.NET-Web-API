@@ -4,8 +4,12 @@ A REST API project for practicing ASP .NET Web API, built with **ASP.NET Core 10
 
 Multiple companies (tenants) can run on the same platform. Each company has its own inventory and staff. Users are divided into SuperAdmin, StoreAdmin and Customers. SuperAdmins have entire access, StoreAdmins have access to their company specific areas, Customers can shop across any company. Every role sees only what they're allowed to see.
 
-🟢 **Live at:** [https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1](https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1)
+🟢 **Live at:** 
+[https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1](https://multitenantecommerceapi20260418205629-chfqfka6enhwbef2.canadacentral-01.azurewebsites.net/scalar/v1)
 
+**OR**
+
+[https://green-field-0f979ec1e.7.azurestaticapps.net/] (Basic Front End)
 ---
 
 ## Try it live
